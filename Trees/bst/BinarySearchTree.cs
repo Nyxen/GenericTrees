@@ -115,10 +115,12 @@ namespace bst
             if (value.CompareTo(temp.Value) < 0)
             {
                 temp.LeftChild = new BinarySearchTreeNode<T>(value);
+                temp.LeftChild.Parent = temp;
             }
             else
             {
                 temp.RightChild = new BinarySearchTreeNode<T>(value);
+                temp.RightChild.Parent = temp;
             }
 
         }

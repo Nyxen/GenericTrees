@@ -11,6 +11,7 @@ namespace bst
         public BinarySearchTreeNode<T> Parent { get; set; }
         public BinarySearchTreeNode<T> LeftChild { get; set; }
         public BinarySearchTreeNode<T> RightChild { get; set; }
+        public bool Visited { get; set; }
         public T Value { get; set; }
 
         public BinarySearchTreeNode(T value)

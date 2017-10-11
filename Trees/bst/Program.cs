@@ -12,9 +12,8 @@ namespace bst
     {
         static void Main(string[] args)
         {
-          
             
-
+        
             BinarySearchTree<int> tree = new BinarySearchTree<int>();
             tree.Insert(5);
             tree.Insert(1);

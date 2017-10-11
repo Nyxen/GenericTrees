@@ -17,7 +17,7 @@ namespace bst
             size = 0;
         }
 
-        public IEnumerable<T> InOrder()
+        public IEnumerable<BinarySearchTreeNode<T>> InOrder()
         {
             BinarySearchTreeNode<T> temp = Minimum();
             Stack<BinarySearchTreeNode<T>> nodes = new Stack<BinarySearchTreeNode<T>>(); 
@@ -25,7 +25,7 @@ namespace bst
             {
                 if (temp.Visited == false)
                 {
-                    yield return temp.Value;
+                    yield return temp;
                     temp.Visited = true;
                     nodes.Push(temp);
                 }
@@ -90,6 +90,7 @@ namespace bst
             }
             return temp;
         }
+        #region RecursiveSearch (not ideal)   
         public bool Search(T value)
         {
             return FindValue(Root, value);
@@ -112,7 +113,7 @@ namespace bst
             }
             return result;
         }
-
+        #endregion RecursiveSearch (not ideal)
         public void Insert(T value)
         {
             if (Root == null)
@@ -130,7 +131,7 @@ namespace bst
                     currentParent = temp;
                     temp = temp.LeftChild;
                 }
-                else if (value.CompareTo(temp.Value) > 0)
+                else if (value.CompareTo(temp.Value) >= 0)
                 {
                     currentParent = temp;
                     temp = temp.RightChild;
@@ -149,6 +150,42 @@ namespace bst
         }
         public void Remove(T value)
         {
+            BinarySearchTreeNode<T> nodeToDelete = null;
+            foreach (var item in InOrder())
+            {
+                if(item.Value.Equals(value))
+                {
+                    nodeToDelete = item;
+                    break;
+                }
+            }
+            BinarySearchTreeNode<T> deleteNodeParent = nodeToDelete.Parent;
+            if (nodeToDelete.LeftChild == null && nodeToDelete.RightChild == null)
+            {   
+                if(deleteNodeParent.LeftChild.Value.Equals(nodeToDelete.Value))
+                {
+                    deleteNodeParent.LeftChild = null;
+                }
+                else
+                {
+                    deleteNodeParent.RightChild = null;
+                }
+            }
+            else if(nodeToDelete.RightChild != null && nodeToDelete.LeftChild == null)
+            {
+                deleteNodeParent.RightChild = nodeToDelete.RightChild;
+            }
+            else if(nodeToDelete.LeftChild != null && nodeToDelete.RightChild == null)
+            {
+                deleteNodeParent.LeftChild = nodeToDelete.LeftChild;
+            }
+            //if both left and right child are not null
+            else
+            {
+
+            }
+
+
 
         }
     }

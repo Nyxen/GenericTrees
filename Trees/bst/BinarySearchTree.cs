@@ -8,7 +8,7 @@ namespace bst
 {
     public class BinarySearchTree<T> where T : IComparable
     {
-        public BinarySearchTreeNode<T> Root { get; set; }
+        public BinarySearchTreeNode<T> Root { get; protected set; }
         int size;
 
         public BinarySearchTree()
@@ -17,43 +17,30 @@ namespace bst
             size = 0;
         }
 
+        //need to fix this
         public IEnumerable<BinarySearchTreeNode<T>> InOrder()
         {
             BinarySearchTreeNode<T> temp = Minimum();
-            Stack<BinarySearchTreeNode<T>> nodes = new Stack<BinarySearchTreeNode<T>>(); 
-            while(temp != null)
+            Stack<BinarySearchTreeNode<T>> nodes = new Stack<BinarySearchTreeNode<T>>();
+
+            while (temp != null)
             {
-                if (temp.Visited == false)
+                yield return temp;
+                temp.Visited = true;
+                if(temp.IsLeafNode && temp.Visited)
                 {
-                    yield return temp;
-                    temp.Visited = true;
-                    nodes.Push(temp);
+                    //should go up
                 }
-                
-                if (temp.LeftChild != null && temp.LeftChild.Visited == false)
-                {
-                    temp = temp.LeftChild;
-                }
-                if (temp.RightChild != null && temp.RightChild.Visited == false)
-                {
-                    temp = temp.RightChild; 
-                }
-                else
-                {
-                    temp = temp.Parent;
-                }
-            }
-            while(nodes.Count > 0)
-            {
-                nodes.Pop().Visited = false;
+
             }
         }
-        public bool Find(T Value)
+
+        public BinarySearchTreeNode<T> Find(T Value)
         {
             BinarySearchTreeNode<T> temp = Root;
-            while(temp != null && !temp.Value.Equals(Value))
+            while (temp != null && !temp.Value.Equals(Value))
             {
-                if(Value.CompareTo(temp.Value) < 0)
+                if (Value.CompareTo(temp.Value) < 0)
                 {
                     temp = temp.LeftChild;
                 }
@@ -64,17 +51,17 @@ namespace bst
             }
             if (temp != null)
             {
-                return temp.Value.CompareTo(Value) == 0;
+                return temp;
             }
             else
             {
-                return false;
+                return null;
             }
         }
         public BinarySearchTreeNode<T> Minimum()
         {
             BinarySearchTreeNode<T> temp = Root;
-            while(temp.LeftChild != null)
+            while (temp.LeftChild != null)
             {
                 temp = temp.LeftChild;
             }
@@ -90,6 +77,7 @@ namespace bst
             }
             return temp;
         }
+        
         #region RecursiveSearch (not ideal)   
         public bool Search(T value)
         {
@@ -98,23 +86,24 @@ namespace bst
         bool result = false;
         private bool FindValue(BinarySearchTreeNode<T> currentNode, T value)
         {
-            if(value.CompareTo(currentNode.Value) == 0)
+            if (value.CompareTo(currentNode.Value) == 0)
             {
                 result = true;
                 return result;
             }
-            if(value.CompareTo(currentNode.Value) < 0 && currentNode.LeftChild != null)
+            if (value.CompareTo(currentNode.Value) < 0 && currentNode.LeftChild != null)
             {
                 FindValue(currentNode.LeftChild, value);
             }
-            else if(value.CompareTo(currentNode.Value) > 0 && currentNode.RightChild != null)
+            else if (value.CompareTo(currentNode.Value) > 0 && currentNode.RightChild != null)
             {
                 FindValue(currentNode.RightChild, value);
             }
             return result;
         }
         #endregion RecursiveSearch (not ideal)
-        public void Insert(T value)
+
+        public void Add(T value)
         {
             if (Root == null)
             {
@@ -138,7 +127,7 @@ namespace bst
                 }
             }
             temp = new BinarySearchTreeNode<T>(value);
-            if(temp.Value.CompareTo(currentParent.Value) < 0)
+            if (temp.Value.CompareTo(currentParent.Value) < 0)
             {
                 currentParent.LeftChild = temp;
             }
@@ -147,22 +136,24 @@ namespace bst
                 currentParent.RightChild = temp;
             }
             temp.Parent = currentParent;
+            size++;
         }
-        public void Remove(T value)
+        public bool Remove(T value)
         {
-            BinarySearchTreeNode<T> nodeToDelete = null;
-            foreach (var item in InOrder())
+            //Use Find instead to get the node, as it will be O(nlog(n)) operation, instead of O(n) with InOrder traversal
+            BinarySearchTreeNode<T> nodeToDelete = Find(value);
+            
+
+            if(nodeToDelete == null)
             {
-                if(item.Value.Equals(value))
-                {
-                    nodeToDelete = item;
-                    break;
-                }
+                return false;
             }
+
             BinarySearchTreeNode<T> deleteNodeParent = nodeToDelete.Parent;
-            if (nodeToDelete.LeftChild == null && nodeToDelete.RightChild == null)
-            {   
-                if(deleteNodeParent.LeftChild.Value.Equals(nodeToDelete.Value))
+
+            if (nodeToDelete.IsLeafNode)
+            {
+                if (nodeToDelete.IsLeftChild)
                 {
                     deleteNodeParent.LeftChild = null;
                 }
@@ -170,23 +161,55 @@ namespace bst
                 {
                     deleteNodeParent.RightChild = null;
                 }
+
+                return true;
             }
-            else if(nodeToDelete.RightChild != null && nodeToDelete.LeftChild == null)
+
+            if (nodeToDelete.HasRightChildOnly)
             {
-                deleteNodeParent.RightChild = nodeToDelete.RightChild;
+                if (nodeToDelete.IsRightChild)
+                {
+                    deleteNodeParent.RightChild = nodeToDelete.RightChild;
+                }
+                else
+                {
+                    deleteNodeParent.LeftChild = nodeToDelete.RightChild;
+                }
+                return true;
             }
-            else if(nodeToDelete.LeftChild != null && nodeToDelete.RightChild == null)
+            else if (nodeToDelete.HasLeftChildOnly)
             {
-                deleteNodeParent.LeftChild = nodeToDelete.LeftChild;
+                if (nodeToDelete.IsLeftChild)
+                {
+                    deleteNodeParent.LeftChild = nodeToDelete.LeftChild;
+                }
+                else
+                {
+                    deleteNodeParent.RightChild = nodeToDelete.LeftChild;
+                }
+                return true;
             }
             //if both left and right child are not null
             else
             {
-
+                BinarySearchTreeNode<T> temp = nodeToDelete.LeftChild;
+                while (temp.RightChild != null)
+                {
+                    temp = temp.RightChild;
+                }
+                nodeToDelete.Value = temp.Value;
+                if (temp.IsLeftChild)
+                {
+                    temp.Parent.LeftChild = null;
+                }
+                else
+                {
+                    temp.Parent.RightChild = null;
+                }
             }
 
 
-
+            return true;
         }
     }
 }

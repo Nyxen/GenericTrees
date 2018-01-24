@@ -128,7 +128,7 @@ namespace DeleteMeForest
             var bst = TreeFactory.CreateBST<int>();
             var avl = TreeFactory.CreateAVL<int>();
             var rbt = TreeFactory.CreateRBTree<int>();
-            
+
 
 
             //var test = new AVLTree<int, AVLNode<int>>();

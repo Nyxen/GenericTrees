@@ -3,41 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Trees.Base;
 
-namespace bst
+namespace Trees
 {
-    public class BinarySearchTree<T> where T : IComparable
+    public class BinarySearchTree<TValue> : BaseBinaryTree<TValue, BinarySearchTreeNode<TValue>>
+        where TValue : IComparable<TValue>
     {
-        internal BinarySearchTreeNode<T> Root { get; private set; }
-        int size;
+        int nodeCount;
 
         public BinarySearchTree()
         {
             Root = null;
-            size = 0;
+            nodeCount = 0;
         }
 
-        //need to fix this
-        public IEnumerable<BinarySearchTreeNode<T>> InOrder()
+      
+
+        public BinarySearchTreeNode<TValue> Find(TValue Value)
         {
-            BinarySearchTreeNode<T> temp = Minimum();
-            Stack<BinarySearchTreeNode<T>> nodes = new Stack<BinarySearchTreeNode<T>>();
-
-            while (temp != null)
-            {
-                yield return temp;
-                temp.Visited = true;
-                if(temp.IsLeafNode && temp.Visited)
-                {
-                    //should go up
-                }
-
-            }
-        }
-
-        public BinarySearchTreeNode<T> Find(T Value)
-        {
-            BinarySearchTreeNode<T> temp = Root;
+            BinarySearchTreeNode<TValue> temp = Root;
             while (temp != null && !temp.Value.Equals(Value))
             {
                 if (Value.CompareTo(temp.Value) < 0)
@@ -58,33 +43,15 @@ namespace bst
                 return null;
             }
         }
-        public BinarySearchTreeNode<T> Minimum()
-        {
-            BinarySearchTreeNode<T> temp = Root;
-            while (temp.LeftChild != null)
-            {
-                temp = temp.LeftChild;
-            }
-            return temp;
-
-        }
-        public BinarySearchTreeNode<T> Maximum()
-        {
-            BinarySearchTreeNode<T> temp = Root;
-            while (temp.RightChild != null)
-            {
-                temp = temp.RightChild;
-            }
-            return temp;
-        }
+       
         
         #region RecursiveSearch (not ideal)   
-        public bool Search(T value)
+        public bool Search(TValue value)
         {
             return FindValue(Root, value);
         }
         bool result = false;
-        private bool FindValue(BinarySearchTreeNode<T> currentNode, T value)
+        private bool FindValue(BinarySearchTreeNode<TValue> currentNode, TValue value)
         {
             if (value.CompareTo(currentNode.Value) == 0)
             {
@@ -103,16 +70,16 @@ namespace bst
         }
         #endregion RecursiveSearch (not ideal)
 
-        public void Add(T value)
+        public void Add(TValue value)
         {
             if (Root == null)
             {
-                Root = new BinarySearchTreeNode<T>(value);
-                size++;
+                Root = new BinarySearchTreeNode<TValue>(value);
+                nodeCount++;
                 return;
             }
-            BinarySearchTreeNode<T> temp = Root;
-            BinarySearchTreeNode<T> currentParent = null;
+            BinarySearchTreeNode<TValue> temp = Root;
+            BinarySearchTreeNode<TValue> currentParent = null;
             while (temp != null)
             {
                 if (value.CompareTo(temp.Value) < 0)
@@ -126,7 +93,7 @@ namespace bst
                     temp = temp.RightChild;
                 }
             }
-            temp = new BinarySearchTreeNode<T>(value);
+            temp = new BinarySearchTreeNode<TValue>(value);
             if (temp.Value.CompareTo(currentParent.Value) < 0)
             {
                 currentParent.LeftChild = temp;
@@ -136,12 +103,12 @@ namespace bst
                 currentParent.RightChild = temp;
             }
             temp.Parent = currentParent;
-            size++;
+            nodeCount++;
         }
-        public bool Remove(T value)
+        public bool Remove(TValue value)
         {
             //Use Find instead to get the node, as it will be O(nlog(n)) operation, instead of O(n) with InOrder traversal
-            BinarySearchTreeNode<T> nodeToDelete = Find(value);
+            BinarySearchTreeNode<TValue> nodeToDelete = Find(value);
             
 
             if(nodeToDelete == null)
@@ -149,7 +116,7 @@ namespace bst
                 return false;
             }
 
-            BinarySearchTreeNode<T> deleteNodeParent = nodeToDelete.Parent;
+            BinarySearchTreeNode<TValue> deleteNodeParent = nodeToDelete.Parent;
 
             if (nodeToDelete.IsLeafNode)
             {
@@ -192,7 +159,7 @@ namespace bst
             //if both left and right child are not null
             else
             {
-                BinarySearchTreeNode<T> temp = nodeToDelete.LeftChild;
+                BinarySearchTreeNode<TValue> temp = nodeToDelete.LeftChild;
                 while (temp.RightChild != null)
                 {
                     temp = temp.RightChild;
